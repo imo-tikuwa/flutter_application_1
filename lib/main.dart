@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 
@@ -28,23 +26,24 @@ class _RandomWordsState extends State<RandomWords> {
     return ListView.builder(
       padding: const EdgeInsets.all(16.0),
       itemBuilder: (context, i) {
-        if (i.isOdd) return Divider();
+        if (i.isOdd) {
+          return const Divider(
+            color: Colors.blue
+          );
+        }
 
         final index = i ~/ 2;
         if (index >= _suggestions.length) {
           _suggestions.addAll(generateWordPairs().take(10));
         }
-        return _buildRow(_suggestions[index]);
-      }
-    );
-  }
 
-  Widget _buildRow(WordPair pair) {
-    return ListTile(
-      title: Text(
-        pair.asPascalCase,
-        style: _biggerFont,
-      ),
+        return ListTile(
+          title: Text(
+            index.toString() + ' ' + _suggestions[index].asPascalCase,
+            style: _biggerFont,
+          ),
+        );
+      }
     );
   }
 
