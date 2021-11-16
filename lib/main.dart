@@ -3,6 +3,22 @@ import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
+// ボタン共通化(前の画面に戻ることができない遷移)
+fotterCommonButtons(BuildContext context) => [
+  TextButton(
+    onPressed: () => Navigator.of(context).pushReplacementNamed('/main'),
+    child: const Text('Main Page')
+  ),
+  TextButton(
+    onPressed: () => Navigator.of(context).pushReplacementNamed('/list'),
+    child: const Text('List Page')
+  ),
+  TextButton(
+    onPressed: () => Navigator.of(context).pushReplacementNamed('/another'),
+    child: const Text('Another Page')
+  ),
+];
+
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -12,7 +28,7 @@ class MyApp extends StatelessWidget {
       title: 'Welcome to Flutter',
       home: const MainPage(),
       routes: <String, WidgetBuilder> {
-        '/home': (BuildContext context) => const MainPage(),
+        '/main': (BuildContext context) => const MainPage(),
         '/list': (BuildContext context) => ListPage(),
         '/another': (BuildContext context) => const AnotherPage()
       }
@@ -29,19 +45,10 @@ class MainPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Main Page'),
       ),
+      persistentFooterButtons: fotterCommonButtons(context),
       body: const Center(
         child: Text('Main Page'),
-      ),
-      persistentFooterButtons: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pushNamed('/list'),
-          child: const Text('List Page')
-        ),
-        TextButton(
-          onPressed: () => Navigator.of(context).pushNamed('/another'),
-          child: const Text('Another Page')
-        ),
-      ]
+      )
     );
   }
 }
@@ -58,6 +65,7 @@ class ListPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Startup Name Generator'),
       ),
+      persistentFooterButtons: fotterCommonButtons(context),
       body: ListView.builder(
         padding: const EdgeInsets.all(16.0),
         itemBuilder: (context, i) {
@@ -91,6 +99,7 @@ class AnotherPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Another Page'),
       ),
+      persistentFooterButtons: fotterCommonButtons(context),
       body: const Center(
         child: Text('Another Page'),
       )
