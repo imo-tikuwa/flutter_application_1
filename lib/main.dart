@@ -3,21 +3,49 @@ import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
-// ボタン共通化(前の画面に戻ることができない遷移)
-fotterCommonButtons(BuildContext context) => [
-  TextButton(
-    onPressed: () => Navigator.of(context).pushReplacementNamed('/main'),
-    child: const Text('Main Page')
-  ),
-  TextButton(
-    onPressed: () => Navigator.of(context).pushReplacementNamed('/list'),
-    child: const Text('List Page')
-  ),
-  TextButton(
-    onPressed: () => Navigator.of(context).pushReplacementNamed('/another'),
-    child: const Text('Another Page')
-  ),
-];
+// フッターのボタンを返す(常に「前の画面に戻ることができない遷移」を行う)
+List<Widget> fotterCommonButtons(BuildContext context) {
+  String? current = ModalRoute.of(context)?.settings.name;
+  List<Widget> buttons = [
+    TextButton(
+      onPressed: (current == '/main' || current == '/') ? null : () => Navigator.of(context).pushReplacementNamed('/main'),
+      child: Column(
+        children: const <Widget>[
+          Icon(Icons.home),
+          Flexible(child: Text('ホーム'))
+        ],
+      ),
+    ),
+    TextButton(
+      onPressed: (current == '/list') ? null : () => Navigator.of(context).pushReplacementNamed('/list'),
+      child: Column(
+        children: const <Widget>[
+          Icon(Icons.list),
+          Flexible(child: Text('リスト'))
+        ],
+      ),
+    ),
+    TextButton(
+      onPressed: (current == '/account') ? null : () => Navigator.of(context).pushReplacementNamed('/account'),
+      child: Column(
+        children: const <Widget>[
+          Icon(Icons.account_balance),
+          Flexible(child: Text('口座'))
+        ],
+      ),
+    ),
+    TextButton(
+      onPressed: (current == '/setting') ? null : () => Navigator.of(context).pushReplacementNamed('/setting'),
+      child: Column(
+        children: const <Widget>[
+          Icon(Icons.settings),
+          Flexible(child: Text('設定'))
+        ],
+      ),
+    ),
+  ];
+  return buttons;
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -30,7 +58,8 @@ class MyApp extends StatelessWidget {
       routes: <String, WidgetBuilder> {
         '/main': (BuildContext context) => const MainPage(),
         '/list': (BuildContext context) => ListPage(),
-        '/another': (BuildContext context) => const AnotherPage()
+        '/account': (BuildContext context) => const AccountPage(),
+        '/setting': (BuildContext context) => const SettingPage()
       }
     );
   }
@@ -90,18 +119,40 @@ class ListPage extends StatelessWidget {
   }
 }
 
-class AnotherPage extends StatelessWidget {
-  const AnotherPage({Key? key}) : super(key: key);
+class AccountPage extends StatelessWidget {
+  const AccountPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Another Page'),
+        title: const Text('口座一覧'),
       ),
       persistentFooterButtons: fotterCommonButtons(context),
       body: const Center(
-        child: Text('Another Page'),
+        child: Text('ここに登録済みの口座を一覧表示する'),
+      )
+    );
+  }
+}
+
+class SettingPage extends StatelessWidget {
+  const SettingPage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('設定'),
+      ),
+      persistentFooterButtons: fotterCommonButtons(context),
+      body: Center(
+        child: Column(
+          children: const <Widget>[
+            Text('ここ設定画面'),
+            Text('ここ設定画面')
+          ],
+        ),
       )
     );
   }
