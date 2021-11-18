@@ -1,12 +1,15 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'database_helper.dart';
+import 'models/account.dart';
 
 void main() => runApp(const MyApp());
 
 // フッターのボタンを返す(常に「前の画面に戻ることができない遷移」を行う)
 List<Widget> fotterCommonButtons(BuildContext context) {
   String? current = ModalRoute.of(context)?.settings.name;
-  List<Widget> buttons = [
+  return [
     TextButton(
       onPressed: (current == '/main' || current == '/') ? null : () => Navigator.of(context).pushReplacementNamed('/main'),
       child: Column(
@@ -26,7 +29,7 @@ List<Widget> fotterCommonButtons(BuildContext context) {
       ),
     ),
     TextButton(
-      onPressed: (current == '/account') ? null : () => Navigator.of(context).pushReplacementNamed('/account'),
+      onPressed: (current == '/account' || current == '/account_new') ? null : () => Navigator.of(context).pushReplacementNamed('/account'),
       child: Column(
         children: const <Widget>[
           Icon(Icons.account_balance),
@@ -44,7 +47,6 @@ List<Widget> fotterCommonButtons(BuildContext context) {
       ),
     ),
   ];
-  return buttons;
 }
 
 class MyApp extends StatelessWidget {
@@ -59,6 +61,7 @@ class MyApp extends StatelessWidget {
         '/main': (BuildContext context) => const MainPage(),
         '/list': (BuildContext context) => ListPage(),
         '/account': (BuildContext context) => const AccountPage(),
+        '/account_new': (BuildContext context) => AccountNewPage(),
         '/setting': (BuildContext context) => const SettingPage()
       }
     );
@@ -129,8 +132,174 @@ class AccountPage extends StatelessWidget {
         title: const Text('口座一覧'),
       ),
       persistentFooterButtons: fotterCommonButtons(context),
-      body: const Center(
-        child: Text('ここに登録済みの口座を一覧表示する'),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.of(context).pushNamed('/account_new'),
+        child: const Icon(Icons.add),
+      ),
+      body: FutureBuilder<List<Account>> (
+        future: DatabaseHelper().getAccounts(),
+        builder: (context, snapshot) {
+          List<Account>? accounts = snapshot.data;
+          return !snapshot.hasData || accounts == null || accounts.isEmpty
+            ? const Center(
+              child: Text('口座が登録されていません')
+            )
+            : ListView.builder(
+              itemCount: accounts.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Card(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                accounts[index].id.toString() + ' : ' + accounts[index].name,
+                                style: const TextStyle(
+                                  fontSize: 20.0,
+                                  color: Colors.lightBlueAccent
+                                ),
+                              ),
+                              Text(
+                                '初期資産額 : ' + NumberFormat("#,###").format(accounts[index].initRecord) + '円',
+                                style: const TextStyle(
+                                  fontSize: 14.0,
+                                  color: Color(0xFF167F67)
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          IconButton(
+                            icon: const Icon(
+                              Icons.edit,
+                              color: Color(0xFF167F67),
+                            ),
+                            // 編集画面に遷移
+                            onPressed: null,
+                            // onPressed: () => Navigator.of(context).pushNamed('/account_edit'),
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.delete_forever,
+                              color: Color(0xFF167F67)
+                            ),
+                            onPressed: () => {
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (BuildContext context) => AlertDialog(
+                                  title: const Text('口座削除'),
+                                  content: Text('口座一覧から「' + accounts[index].id.toString() + ' : ' + accounts[index].name + '」を削除します'),
+                                  actions: [
+                                    TextButton(
+                                      child: const Text("キャンセル"),
+                                      onPressed: () => Navigator.pop(context),
+                                    ),
+                                    TextButton(
+                                      child: const Text("OK"),
+                                      onPressed: () => {
+                                        DatabaseHelper().deleteAccount(accounts[index]),
+                                        Navigator.of(context).pushReplacementNamed('/account')
+                                      },
+                                    ),
+                                  ],
+                                )
+                              )
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  )
+                );
+              },
+            );
+        },
+      )
+    );
+  }
+}
+
+
+class AccountNewPage extends StatelessWidget {
+  AccountNewPage({Key? key}) : super(key: key);
+
+  final _formKey = GlobalKey<FormState>();
+
+  final nameController = TextEditingController();
+  final initRecordController = TextEditingController();
+
+  Future addRecord() async {
+    var account = Account.fromMap({
+      'id': 1,
+      'name': nameController.text,
+      'init_record': int.parse(initRecordController.text)
+    });
+    await DatabaseHelper().insertAccount(account);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('口座登録'),
+      ),
+      persistentFooterButtons: fotterCommonButtons(context),
+      body: Container(
+        margin: const EdgeInsets.only(left: 20, right: 20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              TextFormField(
+                controller: nameController,
+                keyboardType: TextInputType.text,
+                decoration: const InputDecoration(
+                  labelText: "口座名",
+                ),
+                validator: (String? value) {
+                  if (value == null || value.isEmpty) {
+                    return '口座名を入力してください';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: initRecordController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: "初期資産額",
+                ),
+                validator: (String? value) {
+                  if (value == null || value.isEmpty) {
+                    return '初期資産額を入力してください';
+                  }
+                  return null;
+                },
+              ),
+              const Divider(),
+              ElevatedButton(
+                child: const Text('登録'),
+                onPressed: () => {
+                  if (_formKey.currentState!.validate()) {
+                    // 入力データが正常な場合の処理
+                    addRecord(),
+                    Navigator.of(context).pushReplacementNamed('/account')
+                  }
+                },
+              )
+            ],
+          ),
+        )
       )
     );
   }
