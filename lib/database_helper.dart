@@ -62,6 +62,12 @@ class DatabaseHelper {
     return res;
   }
 
+  Future<void> dropAccount() async {
+    var dbClient = await db;
+    await dbClient.rawQuery('DELETE FROM account');
+    await dbClient.rawQuery('DELETE FROM sqlite_sequence WHERE name = \'account\'');
+  }
+
   Account fromAccountMap(Map<String, dynamic> map) {
     return Account(map['id'], map['name'], map['initRecord']);
   }
