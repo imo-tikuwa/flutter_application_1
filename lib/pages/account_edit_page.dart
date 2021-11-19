@@ -1,30 +1,45 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/arguments/account_edit_arguments.dart';
 import 'package:flutter_application_1/database_helper.dart';
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/models/account.dart';
 
-class AccountNewPage extends StatelessWidget {
-  AccountNewPage({Key? key}) : super(key: key);
+class AccountEditPage extends StatelessWidget {
+  AccountEditPage({Key? key}) : super(key: key);
 
   final _formKey = GlobalKey<FormState>();
 
+  final idController = TextEditingController();
   final nameController = TextEditingController();
   final initRecordController = TextEditingController();
 
-  Future addRecord() async {
+  Future updateRecord() async {
     var account = Account.fromMap({
+      'id': int.parse(idController.text),
       'name': nameController.text,
       'init_record': int.parse(initRecordController.text)
     });
-    await DatabaseHelper().insertAccount(account);
+    await DatabaseHelper().updateAccount(account);
   }
 
   @override
   Widget build(BuildContext context) {
+
+    Object? args = ModalRoute.of(context)!.settings.arguments;
+    late Account account;
+    if (args is AccountEditarguments) {
+      account = args.account;
+      idController.text = account.id.toString();
+      nameController.text = account.name;
+      initRecordController.text = account.initRecord.toString();
+    } else {
+      // エラー？
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('口座登録'),
+        title: const Text('口座更新'),
       ),
       persistentFooterButtons: fotterCommonButtons(context),
       body: Container(
@@ -34,6 +49,12 @@ class AccountNewPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
+              Visibility(
+                visible: false,
+                child: TextFormField(
+                  controller: idController,
+                ),
+              ),
               TextFormField(
                 controller: nameController,
                 keyboardType: TextInputType.text,
@@ -62,10 +83,10 @@ class AccountNewPage extends StatelessWidget {
               ),
               const Divider(),
               ElevatedButton(
-                child: const Text('登録'),
+                child: const Text('更新'),
                 onPressed: () => {
                   if (_formKey.currentState!.validate()) {
-                    addRecord(),
+                    updateRecord(),
                     Navigator.of(context).pushReplacementNamed('/account')
                   }
                 },

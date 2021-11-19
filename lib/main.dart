@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/account_edit_page.dart';
 import 'package:flutter_application_1/pages/account_new_page.dart';
 import 'package:flutter_application_1/pages/account_page.dart';
-import 'package:flutter_application_1/pages/list_page.dart';
 import 'package:flutter_application_1/pages/main_page.dart';
 import 'package:flutter_application_1/pages/setting_page.dart';
 
@@ -17,15 +17,6 @@ List<Widget> fotterCommonButtons(BuildContext context) {
         children: const <Widget>[
           Icon(Icons.home),
           Flexible(child: Text('ホーム'))
-        ],
-      ),
-    ),
-    TextButton(
-      onPressed: (current == '/list') ? null : () => Navigator.of(context).pushReplacementNamed('/list'),
-      child: Column(
-        children: const <Widget>[
-          Icon(Icons.list),
-          Flexible(child: Text('リスト'))
         ],
       ),
     ),
@@ -61,9 +52,9 @@ class MyApp extends StatelessWidget {
       initialRoute: '/main',
       routes: <String, WidgetBuilder> {
         '/main': (BuildContext context) => const MainPage(),
-        '/list': (BuildContext context) => ListPage(),
         '/account': (BuildContext context) => const AccountPage(),
         '/account_new': (BuildContext context) => AccountNewPage(),
+        '/account_edit': (BuildContext context) => AccountEditPage(),
         '/setting': (BuildContext context) => const SettingPage()
       }
     );

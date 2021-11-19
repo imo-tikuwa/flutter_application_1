@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/arguments/account_edit_arguments.dart';
 import 'package:flutter_application_1/database_helper.dart';
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/models/account.dart';
@@ -65,9 +66,7 @@ class AccountPage extends StatelessWidget {
                               Icons.edit,
                               color: Color(0xFF167F67),
                             ),
-                            // 編集画面に遷移
-                            onPressed: null,
-                            // onPressed: () => Navigator.of(context).pushNamed('/account_edit'),
+                            onPressed: () => Navigator.of(context).pushNamed('/account_edit', arguments: AccountEditarguments(accounts[index])),
                           ),
                           IconButton(
                             icon: const Icon(
